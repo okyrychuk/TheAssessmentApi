@@ -11,57 +11,27 @@ namespace TheAssessmentApi.Clients
 {
     public class CompanyClient : BaseHttp
     {
+        private const string Companies = "companies";
         public CompanyClient(string name, string password) : base(name, password) { }
 
         public bool CreateCompany(string companyName)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/automation/companies");
-            request.Content = new StringContent($"{{\"Name\":\"{companyName}\"}}");
-
-            var response = SendRequest(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                return false;
-            }
-
-            return true;
+            return Create(Companies, companyName);
         }
 
         public List<Company> GetAllCompanies()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "api/automation/companies");
-
-            var response = SendRequest(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                return null;
-            }
-            return JsonHelper.Deserialize<List<Company>>(response.Content.ReadAsStringAsync().Result);
+            return GetAll<Company>(Companies);
         }
 
         public Company GetCompanyById(int companyId)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"api/automation/companies/id/{companyId}");
-
-            var response = SendRequest(request);
-            if(response.StatusCode != HttpStatusCode.OK)
-            {
-                return null;
-            }
-            return JsonHelper.Deserialize<Company>(response.Content.ReadAsStringAsync().Result);
+            return GetById<Company>(Companies, companyId);
         }
 
         public bool DeleteCompanyById(int companyId)
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"api/automation/companies/id/{companyId}");
-            var response = SendRequest(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                return false;
-            }
-            return true;
+            return DeleteById(Companies, companyId);
         }
     }
 }

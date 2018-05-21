@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using TheAssessmentApi.Models;
 
 namespace TheAssessmentApi.Clients
@@ -21,11 +18,6 @@ namespace TheAssessmentApi.Clients
             client = new HttpClient();
             client.BaseAddress = new Uri(BaseAddress);
             InitBearerToken(name, password);
-        }
-
-        public HttpResponseMessage SendRequest(HttpRequestMessage message)
-        {
-            return client.SendAsync(message).Result;
         }
 
         public void InitBearerToken(string name, string password)
@@ -50,6 +42,62 @@ namespace TheAssessmentApi.Clients
             {
                 client.Dispose();
             }
+        }
+
+        protected bool Create(string resource, string name)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"api/automation/{resource}");
+            request.Content = new StringContent($"{{\"Name\":\"{name}\"}}");
+
+            var response = SendRequest(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        protected List<T> GetAll<T>(string resource)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/automation/{resource}");
+
+            var response = SendRequest(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return null;
+            }
+            return JsonHelper.Deserialize<List<T>>(response.Content.ReadAsStringAsync().Result);
+        }
+
+        protected T GetById<T>(string resource, int id) where T : class
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/automation/{resource}/id/{id}");
+
+            var response = SendRequest(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return null;
+            }
+            return JsonHelper.Deserialize<T>(response.Content.ReadAsStringAsync().Result);
+        }
+
+        protected bool DeleteById(string resource, int id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"api/automation/{resource}/id/{id}");
+            var response = SendRequest(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private HttpResponseMessage SendRequest(HttpRequestMessage message)
+        {
+            return client.SendAsync(message).Result;
         }
     }
 }

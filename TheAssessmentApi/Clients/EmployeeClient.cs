@@ -11,57 +11,27 @@ namespace TheAssessmentApi.Clients
 {
     class EmployeeClient : BaseHttp
     {
+        private const string Employees = "employees";
         public EmployeeClient(string name, string password) : base(name, password) { }
 
         public bool CreateEmployee(string employeeName)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "employees");
-            request.Content = new StringContent($"{{\"Name\":\"{employeeName}\"}}");
-            var response = SendRequest(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                return false;
-            }
-
-            return true;
+            return Create(Employees, employeeName);
         }
 
         public List<Employee> GetAllEmployees()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "employees");
-
-            var response = SendRequest(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                return null;
-            }
-
-            return JsonHelper.Deserialize<List<Employee>>(response.Content.ReadAsStringAsync().Result);
+            return GetAll<Employee>(Employees);
         }
 
         public Employee GetEmployeeById(int employeeId)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"employees/id/{employeeId}");
-
-            var response = SendRequest(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                return null;
-            }
-            return JsonHelper.Deserialize<Employee>(response.Content.ReadAsStringAsync().Result);
+            return GetById<Employee>(Employees, employeeId);
         }
 
-        public bool DeleteCompanyById(int employeeId)
+        public bool DeleteEmployeeById(int employeeId)
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"employees/id/{employeeId}");
-            var response = SendRequest(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                return false;
-            }
-            return true;
+            return DeleteById(Employees, employeeId);
         }
     }
 }
